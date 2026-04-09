@@ -1,3 +1,4 @@
+import react from '@vitejs/plugin-react'
 import glsl from 'vite-plugin-glsl'
 
 function restartOnStaticChange()
@@ -81,6 +82,7 @@ export default {
     },
     plugins:
     [
+        react(),
         glsl(), // Support GLSL files
         restartOnStaticChange() // Restart server on static file change
     ],
