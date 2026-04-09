@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Texture } from 'three'
 
 import Loader from './Utils/Loader.js'
 import EventEmitter from './Utils/EventEmitter.js'

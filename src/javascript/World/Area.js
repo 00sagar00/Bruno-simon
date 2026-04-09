@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Color, LinearFilter, Mesh, MeshBasicMaterial, NearestFilter, Object3D, PlaneGeometry } from 'three'
 import gsap from 'gsap'
 
 import EventEmitter from '../Utils/EventEmitter.js'

@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Euler, Vector3 } from 'three'
 
 export default class Walls
 {

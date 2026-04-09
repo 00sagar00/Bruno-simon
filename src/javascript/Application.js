@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Color, Scene, Vector2, WebGLRenderer } from 'three'
 import * as dat from 'dat.gui'
 
 import Sizes from './Utils/Sizes.js'
@@ -48,17 +48,100 @@ export default class Application
         this.config.debug = window.location.hash === '#debug'
         this.config.cyberTruck = window.location.hash === '#cybertruck'
         this.config.touch = false
+        this.config.performanceProfiles = {
+            low: {
+                rendererPixelRatioMax: 1,
+                powerPreference: 'default',
+                blurStrength: 0,
+                touchBlurStrength: 0,
+                glowEnabled: false,
+                glowRadius: 0.55,
+                glowAlpha: 0.28,
+                shadowRevealAlpha: 0.28
+            },
+            medium: {
+                rendererPixelRatioMax: 1.5,
+                powerPreference: 'high-performance',
+                blurStrength: 0.45,
+                touchBlurStrength: 0.25,
+                glowEnabled: true,
+                glowRadius: 0.65,
+                glowAlpha: 0.42,
+                shadowRevealAlpha: 0.38
+            },
+            high: {
+                rendererPixelRatioMax: 2,
+                powerPreference: 'high-performance',
+                blurStrength: 1,
+                touchBlurStrength: 1,
+                glowEnabled: true,
+                glowRadius: 0.7,
+                glowAlpha: 0.55,
+                shadowRevealAlpha: 0.5
+            }
+        }
+
+        this.config.performanceProfile = this.detectPerformanceProfile()
+        this.config.performance = this.config.performanceProfiles[this.config.performanceProfile]
 
         window.addEventListener('touchstart', () =>
         {
             this.config.touch = true
             this.world.controls.setTouch()
 
-            this.passes.horizontalBlurPass.strength = 1
-            this.passes.horizontalBlurPass.material.uniforms.uStrength.value = new THREE.Vector2(this.passes.horizontalBlurPass.strength, 0)
-            this.passes.verticalBlurPass.strength = 1
-            this.passes.verticalBlurPass.material.uniforms.uStrength.value = new THREE.Vector2(0, this.passes.verticalBlurPass.strength)
+            this.passes.horizontalBlurPass.strength = this.config.performance.touchBlurStrength
+            this.passes.horizontalBlurPass.material.uniforms.uStrength.value = new Vector2(this.passes.horizontalBlurPass.strength, 0)
+            this.passes.verticalBlurPass.strength = this.config.performance.touchBlurStrength
+            this.passes.verticalBlurPass.material.uniforms.uStrength.value = new Vector2(0, this.passes.verticalBlurPass.strength)
         }, { once: true })
+    }
+
+    detectPerformanceProfile()
+    {
+        if(window.location.hash === '#quality-low')
+        {
+            return 'low'
+        }
+
+        if(window.location.hash === '#quality-medium')
+        {
+            return 'medium'
+        }
+
+        if(window.location.hash === '#quality-high')
+        {
+            return 'high'
+        }
+
+        let score = 0
+
+        const deviceMemory = navigator.deviceMemory || 4
+        const hardwareConcurrency = navigator.hardwareConcurrency || 4
+        const coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches
+        const viewportSmall = this.sizes.viewport.width < 900
+        const dpr = window.devicePixelRatio || 1
+
+        if(deviceMemory <= 2) score -= 2
+        else if(deviceMemory <= 4) score -= 1
+
+        if(hardwareConcurrency <= 2) score -= 2
+        else if(hardwareConcurrency <= 4) score -= 1
+
+        if(coarsePointer) score -= 1
+        if(viewportSmall) score -= 1
+        if(dpr > 1.75) score -= 1
+
+        if(score <= - 3)
+        {
+            return 'low'
+        }
+
+        if(score <= - 1)
+        {
+            return 'medium'
+        }
+
+        return 'high'
     }
 
     /**
@@ -69,7 +152,45 @@ export default class Application
         if(this.config.debug)
         {
             this.debug = new dat.GUI({ width: 420 })
+            this.setPerformanceDebugHud()
         }
+    }
+
+    setPerformanceDebugHud()
+    {
+        this.performanceDebugHud = {}
+        this.performanceDebugHud.startupFps = null
+        this.performanceDebugHud.$element = document.createElement('div')
+        this.performanceDebugHud.$element.style.position = 'fixed'
+        this.performanceDebugHud.$element.style.top = '12px'
+        this.performanceDebugHud.$element.style.right = '446px'
+        this.performanceDebugHud.$element.style.padding = '8px 10px'
+        this.performanceDebugHud.$element.style.borderRadius = '8px'
+        this.performanceDebugHud.$element.style.background = 'rgba(0, 0, 0, 0.65)'
+        this.performanceDebugHud.$element.style.border = '1px solid rgba(255, 255, 255, 0.2)'
+        this.performanceDebugHud.$element.style.color = '#ffffff'
+        this.performanceDebugHud.$element.style.fontFamily = 'monospace'
+        this.performanceDebugHud.$element.style.fontSize = '11px'
+        this.performanceDebugHud.$element.style.lineHeight = '1.35'
+        this.performanceDebugHud.$element.style.zIndex = '10000'
+        this.performanceDebugHud.$element.style.pointerEvents = 'none'
+        document.body.appendChild(this.performanceDebugHud.$element)
+
+        this.updatePerformanceDebugHud()
+    }
+
+    updatePerformanceDebugHud()
+    {
+        if(!this.performanceDebugHud || !this.performanceDebugHud.$element)
+        {
+            return
+        }
+
+        const startupFps = this.performanceDebugHud.startupFps === null
+            ? '--'
+            : this.performanceDebugHud.startupFps.toFixed(1)
+
+        this.performanceDebugHud.$element.innerHTML = `quality: ${this.config.performanceProfile}<br>startup fps: ${startupFps}`
     }
 
     /**
@@ -78,24 +199,25 @@ export default class Application
     setRenderer()
     {
         // Scene
-        this.scene = new THREE.Scene()
+        this.scene = new Scene()
 
         // Renderer
-        this.renderer = new THREE.WebGLRenderer({
+        this.renderer = new WebGLRenderer({
             canvas: this.$canvas,
             alpha: true,
-            powerPreference: 'high-performance'
+            powerPreference: this.config.performance.powerPreference
         })
         // this.renderer.setClearColor(0x414141, 1)
         this.renderer.setClearColor(0x000000, 1)
         // this.renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio, 1.5), 2))
-        this.renderer.setPixelRatio(2)
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.config.performance.rendererPixelRatioMax))
         this.renderer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
         this.renderer.autoClear = false
 
         // Resize event
         this.sizes.on('resize', () =>
         {
+            this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.config.performance.rendererPixelRatioMax))
             this.renderer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
         })
     }
@@ -142,14 +264,14 @@ export default class Application
         this.passes.renderPass = new RenderPass(this.scene, this.camera.instance)
 
         this.passes.horizontalBlurPass = new ShaderPass(BlurPass)
-        this.passes.horizontalBlurPass.strength = this.config.touch ? 0 : 1
-        this.passes.horizontalBlurPass.material.uniforms.uResolution.value = new THREE.Vector2(this.sizes.viewport.width, this.sizes.viewport.height)
-        this.passes.horizontalBlurPass.material.uniforms.uStrength.value = new THREE.Vector2(this.passes.horizontalBlurPass.strength, 0)
+        this.passes.horizontalBlurPass.strength = this.config.touch ? 0 : this.config.performance.blurStrength
+        this.passes.horizontalBlurPass.material.uniforms.uResolution.value = new Vector2(this.sizes.viewport.width, this.sizes.viewport.height)
+        this.passes.horizontalBlurPass.material.uniforms.uStrength.value = new Vector2(this.passes.horizontalBlurPass.strength, 0)
 
         this.passes.verticalBlurPass = new ShaderPass(BlurPass)
-        this.passes.verticalBlurPass.strength = this.config.touch ? 0 : 1
-        this.passes.verticalBlurPass.material.uniforms.uResolution.value = new THREE.Vector2(this.sizes.viewport.width, this.sizes.viewport.height)
-        this.passes.verticalBlurPass.material.uniforms.uStrength.value = new THREE.Vector2(0, this.passes.verticalBlurPass.strength)
+        this.passes.verticalBlurPass.strength = this.config.touch ? 0 : this.config.performance.blurStrength
+        this.passes.verticalBlurPass.material.uniforms.uResolution.value = new Vector2(this.sizes.viewport.width, this.sizes.viewport.height)
+        this.passes.verticalBlurPass.material.uniforms.uStrength.value = new Vector2(0, this.passes.verticalBlurPass.strength)
 
         // Debug
         if(this.debug)
@@ -163,11 +285,12 @@ export default class Application
 
         this.passes.glowsPass = new ShaderPass(GlowsPass)
         this.passes.glowsPass.color = '#ffcfe0'
-        this.passes.glowsPass.material.uniforms.uPosition.value = new THREE.Vector2(0, 0.25)
-        this.passes.glowsPass.material.uniforms.uRadius.value = 0.7
-        this.passes.glowsPass.material.uniforms.uColor.value = new THREE.Color(this.passes.glowsPass.color)
+        this.passes.glowsPass.material.uniforms.uPosition.value = new Vector2(0, 0.25)
+        this.passes.glowsPass.material.uniforms.uRadius.value = this.config.performance.glowRadius
+        this.passes.glowsPass.material.uniforms.uColor.value = new Color(this.passes.glowsPass.color)
         this.passes.glowsPass.material.uniforms.uColor.value.convertLinearToSRGB()
-        this.passes.glowsPass.material.uniforms.uAlpha.value = 0.55
+        this.passes.glowsPass.material.uniforms.uAlpha.value = this.config.performance.glowAlpha
+        this.passes.glowsPass.enabled = this.config.performance.glowEnabled
 
         // Debug
         if(this.debug)
@@ -180,7 +303,7 @@ export default class Application
             folder.add(this.passes.glowsPass.material.uniforms.uRadius, 'value').step(0.001).min(0).max(2).name('radius')
             folder.addColor(this.passes.glowsPass, 'color').name('color').onChange(() =>
             {
-                this.passes.glowsPass.material.uniforms.uColor.value = new THREE.Color(this.passes.glowsPass.color)
+                this.passes.glowsPass.material.uniforms.uColor.value = new Color(this.passes.glowsPass.color)
             })
             folder.add(this.passes.glowsPass.material.uniforms.uAlpha, 'value').step(0.001).min(0).max(1).name('alpha')
         }
@@ -196,6 +319,7 @@ export default class Application
         {
             this.passes.horizontalBlurPass.enabled = this.passes.horizontalBlurPass.material.uniforms.uStrength.value.x > 0
             this.passes.verticalBlurPass.enabled = this.passes.verticalBlurPass.material.uniforms.uStrength.value.y > 0
+            this.passes.glowsPass.enabled = this.config.performance.glowEnabled && this.passes.glowsPass.material.uniforms.uAlpha.value > 0
 
             // Renderer
             this.passes.composer.render()
@@ -208,10 +332,105 @@ export default class Application
         {
             this.renderer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
             this.passes.composer.setSize(this.sizes.viewport.width, this.sizes.viewport.height)
+            if(this.passes.composer.setPixelRatio)
+            {
+                this.passes.composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.config.performance.rendererPixelRatioMax))
+            }
             this.passes.horizontalBlurPass.material.uniforms.uResolution.value.x = this.sizes.viewport.width
             this.passes.horizontalBlurPass.material.uniforms.uResolution.value.y = this.sizes.viewport.height
             this.passes.verticalBlurPass.material.uniforms.uResolution.value.x = this.sizes.viewport.width
             this.passes.verticalBlurPass.material.uniforms.uResolution.value.y = this.sizes.viewport.height
+        })
+
+        this.startPerformanceAutoTune()
+    }
+
+    setPerformanceProfile(_profileName)
+    {
+        if(!this.config.performanceProfiles[_profileName])
+        {
+            return
+        }
+
+        this.config.performanceProfile = _profileName
+        this.config.performance = this.config.performanceProfiles[_profileName]
+
+        if(this.renderer)
+        {
+            const pixelRatio = Math.min(window.devicePixelRatio || 1, this.config.performance.rendererPixelRatioMax)
+            this.renderer.setPixelRatio(pixelRatio)
+        }
+
+        if(this.passes)
+        {
+            const blurStrength = this.config.touch ? 0 : this.config.performance.blurStrength
+            this.passes.horizontalBlurPass.strength = blurStrength
+            this.passes.verticalBlurPass.strength = blurStrength
+            this.passes.horizontalBlurPass.material.uniforms.uStrength.value = new Vector2(blurStrength, 0)
+            this.passes.verticalBlurPass.material.uniforms.uStrength.value = new Vector2(0, blurStrength)
+            this.passes.glowsPass.material.uniforms.uRadius.value = this.config.performance.glowRadius
+            this.passes.glowsPass.material.uniforms.uAlpha.value = this.config.performance.glowAlpha
+            this.passes.glowsPass.enabled = this.config.performance.glowEnabled
+
+            if(this.passes.composer && this.passes.composer.setPixelRatio)
+            {
+                this.passes.composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.config.performance.rendererPixelRatioMax))
+            }
+        }
+
+        if(this.world && this.world.shadows)
+        {
+            this.world.shadows.alpha = Math.min(this.world.shadows.alpha, this.config.performance.shadowRevealAlpha)
+        }
+
+        if(this.debug)
+        {
+            console.info(`Quality profile: ${this.config.performanceProfile}`)
+        }
+
+        this.updatePerformanceDebugHud()
+    }
+
+    startPerformanceAutoTune()
+    {
+        this.performanceAutoTune = {
+            elapsed: 0,
+            frames: 0,
+            done: false
+        }
+
+        this.time.on('tick', () =>
+        {
+            if(this.performanceAutoTune.done)
+            {
+                return
+            }
+
+            this.performanceAutoTune.elapsed += this.time.delta
+            this.performanceAutoTune.frames++
+
+            if(this.performanceAutoTune.elapsed < 3500)
+            {
+                return
+            }
+
+            const fps = this.performanceAutoTune.frames / (this.performanceAutoTune.elapsed / 1000)
+            if(this.performanceDebugHud)
+            {
+                this.performanceDebugHud.startupFps = fps
+            }
+
+            if(fps < 30 && this.config.performanceProfile !== 'low')
+            {
+                this.setPerformanceProfile('low')
+            }
+            else if(fps < 42 && this.config.performanceProfile === 'high')
+            {
+                this.setPerformanceProfile('medium')
+            }
+
+            this.performanceAutoTune.done = true
+            this.updatePerformanceDebugHud()
         })
     }
 
@@ -289,6 +508,9 @@ export default class Application
 
         this.camera.orbitControls.dispose()
         this.renderer.dispose()
-        this.debug.destroy()
+        if(this.debug)
+        {
+            this.debug.destroy()
+        }
     }
 }

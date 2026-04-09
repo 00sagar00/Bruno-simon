@@ -1,6 +1,5 @@
-import * as THREE from 'three'
+import { ArrowHelper, BoxGeometry, Color, Mesh, MeshBasicMaterial, MeshNormalMaterial, Object3D, PlaneGeometry, Vector3 } from 'three'
 import ShadowMaterial from '../Materials/Shadow.js'
-import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 
 export default class Shadows
 {
@@ -21,7 +20,7 @@ export default class Shadows
         this.wireframeVisible = false
         this.items = []
 
-        this.container = new THREE.Object3D()
+        this.container = new Object3D()
         this.container.matrixAutoUpdate = false
         this.container.updateMatrix()
 
@@ -44,11 +43,11 @@ export default class Shadows
 
             this.debugFolder.addColor(this, 'color').onChange(() =>
             {
-                this.materials.base.uniforms.uColor.value = new THREE.Color(this.color)
+                this.materials.base.uniforms.uColor.value = new Color(this.color)
 
                 for(const _shadow of this.items)
                 {
-                    _shadow.material.uniforms.uColor.value = new THREE.Color(this.color)
+                    _shadow.material.uniforms.uColor.value = new Color(this.color)
                 }
             })
         }
@@ -72,13 +71,13 @@ export default class Shadows
 
                 // Angle
                 // Project the rotation as a vector on a plane and extract the angle
-                const rotationVector = new THREE.Vector3(1, 0, 0)
+                const rotationVector = new Vector3(1, 0, 0)
                 rotationVector.applyQuaternion(_shadow.reference.quaternion)
                 // const planeVector = new THREE.Vector3(0, 0, 1)
                 // planeVector.normalize()
-                const projectedRotationVector = rotationVector.clone().projectOnPlane(new THREE.Vector3(0, 0, 1))
+                const projectedRotationVector = rotationVector.clone().projectOnPlane(new Vector3(0, 0, 1))
 
-                let orientationAlpha = Math.abs(rotationVector.angleTo(new THREE.Vector3(0, 0, 1)) - Math.PI * 0.5) / (Math.PI * 0.5)
+                let orientationAlpha = Math.abs(rotationVector.angleTo(new Vector3(0, 0, 1)) - Math.PI * 0.5) / (Math.PI * 0.5)
                 orientationAlpha /= 0.5
                 orientationAlpha -= 1 / 0.5
                 orientationAlpha = Math.abs(orientationAlpha)
@@ -100,9 +99,9 @@ export default class Shadows
     setSun()
     {
         this.sun = {}
-        this.sun.position = new THREE.Vector3(- 2.5, - 2.65, 3.75)
-        this.sun.vector = new THREE.Vector3()
-        this.sun.helper = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0), 1, 0xffffff, 0.1, 0.4)
+        this.sun.position = new Vector3(- 2.5, - 2.65, 3.75)
+        this.sun.vector = new Vector3()
+        this.sun.helper = new ArrowHelper(new Vector3(0, 0, 1), new Vector3(0, 0, 0), 1, 0xffffff, 0.1, 0.4)
         this.sun.helper.visible = false
         this.container.add(this.sun.helper)
 
@@ -136,19 +135,19 @@ export default class Shadows
     {
         // Wireframe
         this.materials = {}
-        this.materials.wireframe = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true })
+        this.materials.wireframe = new MeshBasicMaterial({ color: 0xffffff, wireframe: true })
 
         // Base
         this.materials.base = new ShadowMaterial()
         this.materials.base.depthWrite = false
-        this.materials.base.uniforms.uColor.value = new THREE.Color(this.color)
+        this.materials.base.uniforms.uColor.value = new Color(this.color)
         this.materials.base.uniforms.uAlpha.value = 0
         this.materials.base.uniforms.uFadeRadius.value = 0.35
     }
 
     setGeometry()
     {
-        this.geometry = new THREE.PlaneGeometry(1, 1, 1, 1)
+        this.geometry = new PlaneGeometry(1, 1, 1, 1)
     }
 
     setHelper()
@@ -158,11 +157,24 @@ export default class Shadows
             return
         }
 
+        import('three/examples/jsm/controls/TransformControls.js').then(({ TransformControls }) =>
+        {
+            this.createDebugHelper(TransformControls)
+        })
+    }
+
+    createDebugHelper(TransformControls)
+    {
+        if(this.helper)
+        {
+            return
+        }
+
         this.helper = {}
 
         this.helper.active = false
 
-        this.helper.mesh = new THREE.Mesh(new THREE.BoxGeometry(3, 1, 1, 1), new THREE.MeshNormalMaterial())
+        this.helper.mesh = new Mesh(new BoxGeometry(3, 1, 1, 1), new MeshNormalMaterial())
         this.helper.mesh.position.z = 1.5
         this.helper.mesh.position.y = - 3
         this.helper.mesh.visible = this.helper.active
@@ -229,7 +241,7 @@ export default class Shadows
         shadow.material = this.materials.base.clone()
 
         // Mesh
-        shadow.mesh = new THREE.Mesh(this.geometry, this.wireframeVisible ? this.materials.wireframe : shadow.material)
+        shadow.mesh = new Mesh(this.geometry, this.wireframeVisible ? this.materials.wireframe : shadow.material)
         shadow.mesh.position.z = this.zFightingDistance
         shadow.mesh.scale.set(_options.sizeX, _options.sizeY, 2.4)
 

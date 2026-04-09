@@ -1,5 +1,23 @@
-import restart from 'vite-plugin-restart'
 import glsl from 'vite-plugin-glsl'
+
+function restartOnStaticChange()
+{
+    return {
+        name: 'restart-on-static-change',
+        configureServer(server)
+        {
+            server.watcher.add('../static/**')
+
+            server.watcher.on('change', (_path) =>
+            {
+                if(_path.includes('/static/') || _path.includes('\\static\\'))
+                {
+                    server.restart()
+                }
+            })
+        }
+    }
+}
 
 export default {
     root: 'src/', // Sources files (typically where index.html is)
@@ -13,11 +31,57 @@ export default {
     {
         outDir: '../dist', // Output in the dist/ folder
         emptyOutDir: true, // Empty the folder first
-        sourcemap: true // Add sourcemap
+        sourcemap: true, // Add sourcemap
+        chunkSizeWarningLimit: 700,
+        rolldownOptions:
+        {
+            output:
+            {
+                manualChunks(id)
+                {
+                    if(!id.includes('node_modules'))
+                    {
+                        return
+                    }
+
+                    if(id.includes('/three/examples/'))
+                    {
+                        return 'vendor-three-examples'
+                    }
+
+                    if(id.includes('/three/'))
+                    {
+                        return 'vendor-three'
+                    }
+
+                    if(id.includes('/gsap/'))
+                    {
+                        return 'vendor-gsap'
+                    }
+
+                    if(id.includes('/cannon/'))
+                    {
+                        return 'vendor-cannon'
+                    }
+
+                    if(id.includes('/howler/'))
+                    {
+                        return 'vendor-howler'
+                    }
+
+                    if(id.includes('/dat.gui/'))
+                    {
+                        return 'vendor-datgui'
+                    }
+
+                    return 'vendor'
+                }
+            }
+        }
     },
     plugins:
     [
         glsl(), // Support GLSL files
-        restart({ restart: [ '../static/**', ] }) // Restart server on static file change
+        restartOnStaticChange() // Restart server on static file change
     ],
 }

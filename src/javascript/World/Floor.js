@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Color, DataTexture, LinearFilter, Mesh, Object3D, PlaneGeometry } from 'three'
 import FloorMaterial from '../Materials/Floor.js'
 
 export default class Floor

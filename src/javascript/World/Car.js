@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Euler, Object3D, Vector2, Vector3 } from 'three'
 import CANNON from 'cannon'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 

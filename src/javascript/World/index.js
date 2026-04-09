@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Euler, LinearFilter, Mesh, MeshBasicMaterial, NearestFilter, Object3D, PlaneGeometry, Texture, Vector2, AxesHelper } from 'three'
 import Materials from './Materials.js'
 import Floor from './Floor.js'
 import Shadows from './Shadows.js'
@@ -91,7 +91,7 @@ export default class World
         {
             gsap.fromTo(this.reveal, { matcapsProgress: 0 }, { matcapsProgress: 1, duration: 3 })
             gsap.fromTo(this.reveal, { floorShadowsProgress: 0 }, { floorShadowsProgress: 1, duration: 3, delay: 0.5 })
-            gsap.fromTo(this.shadows, { alpha: 0 }, { alpha: 0.5, duration: 3, delay: 0.5 })
+            gsap.fromTo(this.shadows, { alpha: 0 }, { alpha: this.config.performance.shadowRevealAlpha, duration: 3, delay: 0.5 })
 
             if(this.sections.intro)
             {

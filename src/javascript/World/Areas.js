@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Object3D, Raycaster, Vector2 } from 'three'
 
 import Area from './Area.js'
 

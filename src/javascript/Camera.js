@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Euler, Mesh, MeshBasicMaterial, Object3D, PerspectiveCamera, PlaneGeometry, Raycaster, Vector2, Vector3 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import gsap from 'gsap'
 

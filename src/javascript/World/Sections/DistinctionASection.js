@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Euler, Object3D, Vector3 } from 'three'
 
 export default class DistinctionASection
 {

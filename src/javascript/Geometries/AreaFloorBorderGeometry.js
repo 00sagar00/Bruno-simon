@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { BufferAttribute, BufferGeometry, Float32BufferAttribute } from 'three'
 
 class AreaFloorBorderGeometry
 {

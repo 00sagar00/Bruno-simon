@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Euler, LinearFilter, Mesh, MeshBasicMaterial, NearestFilter, Object3D, PlaneGeometry, Vector2, Vector3 } from 'three'
 
 export default class IntroSection
 {

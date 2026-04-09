@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { ShaderMaterial } from 'three'
 
 import shaderFragment from '../../shaders/floor/fragment.glsl'
 import shaderVertex from '../../shaders/floor/vertex.glsl'

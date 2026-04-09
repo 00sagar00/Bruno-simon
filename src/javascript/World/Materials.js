@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Color, MeshBasicMaterial, ShaderMaterial } from 'three'
 import FloorShadowMaterial from '../Materials/FloorShadow.js'
 import MatcapMaterial from '../Materials/Matcap.js'
 

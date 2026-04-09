@@ -1,5 +1,5 @@
 import CANNON from 'cannon'
-import * as THREE from 'three'
+import { BoxGeometry, CylinderGeometry, Mesh, MeshBasicMaterial, Object3D, SphereGeometry } from 'three'
 
 export default class Physics
 {
