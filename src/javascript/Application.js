@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { Color, Scene, Vector2, WebGLRenderer } from 'three'
 import * as dat from 'dat.gui'
 
@@ -514,3 +515,4 @@ export default class Application
         }
     }
 }
+

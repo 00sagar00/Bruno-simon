@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { ArrowHelper, BoxGeometry, Color, Mesh, MeshBasicMaterial, MeshNormalMaterial, Object3D, PlaneGeometry, Vector3 } from 'three'
 import ShadowMaterial from '../Materials/Shadow.js'
 
@@ -252,3 +253,4 @@ export default class Shadows
         return shadow
     }
 }
+

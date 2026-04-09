@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { Color, LinearFilter, Mesh, MeshBasicMaterial, NearestFilter, Object3D, PlaneGeometry } from 'three'
 import gsap from 'gsap'
 
@@ -306,3 +307,4 @@ export default class Area extends EventEmitter
         })
     }
 }
+

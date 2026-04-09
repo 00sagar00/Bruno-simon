@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { Color, Euler, LinearFilter, Mesh, MeshBasicMaterial, NearestFilter, Object3D, Texture, Vector2, Vector3 } from 'three'
 
 import ProjectBoardMaterial from '../../Materials/ProjectBoard.js'
@@ -207,3 +208,4 @@ export default class Project
         this.floor.container.add(this.floor.areaLabel)
     }
 }
+

@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { BufferGeometry, Color, DoubleSide, Euler, Mesh, MeshNormalMaterial, Object3D, PlaneGeometry, Vector3 } from 'three'
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
@@ -352,3 +353,4 @@ export default class Objects
         return object
     }
 }
+

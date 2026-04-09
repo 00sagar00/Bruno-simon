@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { ShaderMaterial, UniformsLib } from 'three'
 
 import shaderFragment from '../../shaders/matcap/fragment.glsl'
@@ -46,3 +47,4 @@ export default function()
 
     return material
 }
+

@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { Euler, LinearFilter, Mesh, MeshBasicMaterial, NearestFilter, Object3D, PlaneGeometry, Texture, Vector2, AxesHelper } from 'three'
 import Materials from './Materials.js'
 import Floor from './Floor.js'
@@ -510,3 +511,4 @@ export default class World
         this.container.add(this.easterEggs.container)
     }
 }
+

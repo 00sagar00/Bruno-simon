@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { Object3D } from 'three'
 import Zone from './Zone.js'
 
@@ -78,3 +79,4 @@ export default class Zones
         return zone
     }
 }
+

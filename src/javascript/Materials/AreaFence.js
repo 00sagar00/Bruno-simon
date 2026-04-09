@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { DoubleSide, ShaderMaterial } from 'three'
 
 import shaderFragment from '../../shaders/areaFence/fragment.glsl'
@@ -24,3 +25,4 @@ export default function()
 
     return material
 }
+

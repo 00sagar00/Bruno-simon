@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { BufferAttribute, BufferGeometry, Float32BufferAttribute } from 'three'
 
 // AreaFenceGeometry
@@ -127,3 +128,4 @@ class AreaFenceGeometry
 }
 
 export default AreaFenceGeometry
+

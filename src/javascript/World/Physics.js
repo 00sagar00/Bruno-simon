@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import CANNON from 'cannon'
 import { BoxGeometry, CylinderGeometry, Mesh, MeshBasicMaterial, Object3D, SphereGeometry } from 'three'
 
@@ -822,3 +823,4 @@ export default class Physics
         return collision
     }
 }
+

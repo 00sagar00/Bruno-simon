@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { ShaderMaterial } from 'three'
 
 import shaderFragment from '../../shaders/shadow/fragment.glsl'
@@ -21,3 +22,4 @@ export default function()
 
     return material
 }
+

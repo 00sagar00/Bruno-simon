@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { BoxGeometry, Mesh, MeshBasicMaterial } from 'three'
 
 import EventEmitter from '../Utils/EventEmitter.js'
@@ -26,3 +27,4 @@ export default class Zone extends EventEmitter
         this.mesh.position.z = 1.5
     }
 }
+

@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { Texture } from 'three'
 
 import Loader from './Utils/Loader.js'
@@ -248,3 +249,4 @@ export default class Resources extends EventEmitter
         })
     }
 }
+

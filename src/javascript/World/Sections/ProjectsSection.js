@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { LinearFilter, Mesh, MeshBasicMaterial, NearestFilter, Object3D, PlaneGeometry, Vector2 } from 'three'
 import Project from './Project'
 import gsap from 'gsap'
@@ -455,3 +456,4 @@ export default class ProjectsSection
         this.items.push(project)
     }
 }
+

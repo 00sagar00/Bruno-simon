@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { Object3D, Vector2, Vector3 } from 'three'
 
 export default class CrossroadsSection
@@ -54,3 +55,4 @@ export default class CrossroadsSection
         })
     }
 }
+

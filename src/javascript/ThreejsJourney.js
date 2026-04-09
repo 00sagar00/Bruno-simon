@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import gsap from 'gsap'
 import brand from './config/brand.js'
 
